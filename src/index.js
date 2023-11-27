@@ -35,7 +35,7 @@ async function handleFormSubmit(event) {
 }
 
 async function handleLoadMoreClick() {
-  page = +1;
+  page +=1;
   try {
     await fetchImages(searchField.value, page);
   } catch (error) {
@@ -58,18 +58,24 @@ async function fetchImages(query, pageNumber) {
       const markup = data.hits.map(createImageCard).join('');
       gallery.insertAdjacentHTML('beforeend', markup);
       loadMoreButton.style.display = 'block';
-      Notiflix.Notify.success(`Hooray! We found ${data.totalHits} images`);
+
+      if (data.totalHits && data.totalHits <= pageNumber * perPage) {
+        loadMoreButton.style.display = 'none';
+        Notiflix.Notify.info("We're sorry, but you've reached the end of search results.");
+      } else {
+        Notiflix.Notify.success(`Hooray! We found ${data.totalHits} images`);
+      }
     } else {
       loadMoreButton.style.display = 'none';
-      Notiflix.Notify.failure(
-        'Sorry, there are no images matching your search query. Please try again.'
-      );
+      Notiflix.Notify.failure('Sorry, there are no images matching your search query. Please try again.');
     }
   } catch (error) {
     console.error('Error fetching images:', error);
     Notiflix.Notify.failure('Error fetching images. Please try again later.');
   }
 }
+
+
 
 function createImageCard(image) {
   return `
